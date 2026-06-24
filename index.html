@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Gajera International School Utran Voting</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&amp;display=swap" rel="stylesheet" />
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet" />
+
+    <link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+    <div class="container" role="main">
+        <header>
+            <div class="logo" aria-hidden="true" title="School Logo">
+                <img src="Logo.png" alt="Gajera International School Logo"
+                    onerror="this.onerror=null;this.src='https://placehold.co/72x72/0f7c75/FFFFFF?text=G';">
+            </div>
+            <div class="school-info">
+                <div class="school-name">Shri H. J. Gajera Madhyamik ane Uchchtar Madhyamik Shala, Utran</div>
+            </div>
+        </header>
+
+        <h1 class="title">Student Council Election 2026-27</h1>
+
+        <section id="home-view" class="view" aria-label="Voting categories">
+            <div class="button-grid" role="list">
+                <button type="button" class="btn head-class" data-category="head-class">
+                    <span class="material-icons" aria-hidden="true">school</span>Head Boy/Head Girl
+                </button>
+            </div>
+            <div class="controls-container">
+                <button id="show-results-btn" class="btn view-results" aria-label="View voting results">
+                    <span class="material-icons" aria-hidden="true">poll</span> View Results
+                </button>
+                <button id="reset-btn" class="btn reset-votes" aria-label="Reset all votes">
+                    <span class="material-icons" aria-hidden="true">restart_alt</span> Reset Votes
+                </button>
+            </div>
+        </section>
+
+        <section id="gender-selection-view" class="view">
+            <h2 id="gender-category-title"></h2>
+            <div class="button-grid" id="gender-buttons">
+                <button class="btn" data-gender="male"><span class="material-icons">male</span> Male</button>
+                <button class="btn" data-gender="female"><span class="material-icons">female</span> Female</button>
+            </div>
+            <button class="btn back-btn" data-action="go-home">
+                <span class="material-icons">arrow_back</span> Back to Home
+            </button>
+        </section>
+
+        <section id="candidate-view" class="view" aria-live="polite" aria-atomic="true">
+            <h2 id="candidate-category-title"></h2>
+            <div class="candidates-list" id="candidates-list"></div>
+            <div class="info-message" id="info-message-candidate"></div>
+            <button class="btn back-btn" data-action="go-to-gender-select">
+                <span class="material-icons">arrow_back</span> Back to Gender Selection
+            </button>
+        </section>
+
+        <section id="results-view" class="view" aria-live="polite" aria-atomic="true" tabindex="-1">
+            <h2>Voting Results</h2>
+            <div class="results-list" id="results-list"></div>
+            <button id="results-back-btn" class="btn back-btn">
+                <span class="material-icons">arrow_back</span> Back to Home
+            </button>
+        </section>
+    </div>
+
+    <div class="modal-overlay" id="password-modal">
+        <div class="modal-content">
+            <h3 class="modal-title" id="modal-title">Enter Admin Password</h3>
+            <input type="password" class="password-input" id="password-input" placeholder="Enter password">
+            <div class="modal-buttons">
+                <button class="modal-btn cancel" id="cancel-password">Cancel</button>
+                <button class="modal-btn submit" id="submit-password">Submit</button>
+            </div>
+        </div>
+    </div>
+    <script src="script.js"></script>
+
+
+</body>
+
+</html>
