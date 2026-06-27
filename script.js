@@ -1,301 +1,343 @@
-
 (() => {
-        // --- DATA ---
-        const candidates = {
-            'head-class': {
-                male: [
-                    { name: "Dhruv Gediya", logoUrl: "elction/boys/Gediya Dhruv Ashvinbhai.JPG" },
-                    { name: "Jainesh Patel", logoUrl: "elction/boys/Patel Jainesh Hiteshbhai.jpg" },
-                    { name: "Granth Mepani", logoUrl: "elction/boys/GRANTH MEPANI.jpg" },
-                    { name: "Manthan Kapadiya", logoUrl: "elction/boys/Kapadiya Manthan Ashvinbhai.jpg" },
-                    { name: "Yash Kalathiya ", logoUrl: "elction/boys/YASH KALATHIYA.jpg" },
-                    { name: "Pal Jasani ", logoUrl: "elction/boys/PAL JASANI.jpg" },
-                    { name: "Kirsh Bhanderi ", logoUrl: "elction/boys/KRISH BAHNDERI.jpg" },
-                    { name: "Vashu Italiya ", logoUrl: "elction/boys/VASU ITALIYA.jpg" },
-                    { name: "Divit Akabari ", logoUrl: "elction/boys/DIVIT AKBARI.jpg" }
-                ],
-                female: [
-                    { name: "Deesha Miyani", logoUrl: "elction/girl/Miyani Deesha Jagdishbhai.jpg" },
-                    { name: "Krisha Patel", logoUrl: "elction/girl/Patel Krisha Maheshkumar.jpg" },
-                    { name: "Mahi Gojariya", logoUrl: "elction/girl/Gojariya Mahi Mukeshbhai.JPG" }
-                ]
-            }
-        };
+  // ---------- DATA ----------
+  const candidates = {
+    'head-class': {
+      male: [
+        { name: "Gohil Dhyey", logoUrl: "elction/boys/GOHIL DHYEY.jpeg" },
+        { name: "Patel Vihan", logoUrl: "elction/boys/PATEL VIHAN.jpeg" },
+        { name: "Vampariya Daksh", logoUrl: "elction/boys/VAMPARIYA DAKSH.jpeg" }
+      ],
+      female: [
+        { name: "Lapani Shreeja", logoUrl: "elction/girl/LAPANI SHREEJA.jpeg" },
+        { name: "Navapariya Hetvi", logoUrl: "elction/girl/NAVAPARIYA HETVI.jpeg" },
+        { name: "Parmar Kenvisha", logoUrl: "elction/girl/PARMAR KENVISHA.jpeg" }
+      ]
+    }
+  };
 
-        const maleVotingIcons = [
-            'Logo.png',
-            'Logo.png',
-            'Logo.png',
-            'Logo.png',
-            'Logo.png',
-            'Logo.png',
-            'Logo.png',
-            'Logo.png',
-            'Logo.png'
-            
-        ];
+  const maleVotingIcons = [
+    'logo/GOHIL DHYEY.png',
+    'logo/PATEL VIHAN (2).jpeg',
+    'logo/VAMPARIYA DAKSH (2).jpeg'
+  ];
+  const femaleVotingIcons = [
+    'logo/LAPANI SHREEJA (2).jpeg',
+    'logo/NAVAPARIYA HETVI.jpg',
+    'logo/PARMAR KENVISHA.png'
+  ];
 
-        const femaleVotingIcons = [
-            'Logo.png',
-            'Logo.png',
-            'Logo.png'
-            
-        ];
+  // SVG placeholders
+  const getPlaceholderSVG = (text, bg = '#1e3a8a') => 
+    `data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 width=%22140%22 height=%22140%22 viewBox=%220 0 140 140%22%3E%3Ccircle cx=%2270%22 cy=%2270%22 r=%2268%22 fill=%22${encodeURIComponent(bg)}%22 stroke=%22%233b82f6%22 stroke-width=%222%22/%3E%3Ctext x=%2270%22 y=%2285%22 font-family=%22Inter, sans-serif%22 font-size=%2248%22 font-weight=%22700%22 text-anchor=%22middle%22 fill=%22white%22%3E${text.charAt(0).toUpperCase()}%3C/text%3E%3C/svg%3E`;
 
-        const ADMIN_PASSWORD = "admin123";
-        let currentCategory = null;
-        let categorySessionProgress = {};
-        let currentAction = null;
+  const ADMIN_PASSWORD = "admin123";
+  let currentCategory = null;
+  let categorySessionProgress = {};
+  let currentAction = null;
 
-        // --- DOM ELEMENTS ---
-        const views = {
-            home: document.getElementById('home-view'),
-            gender: document.getElementById('gender-selection-view'),
-            candidate: document.getElementById('candidate-view'),
-            results: document.getElementById('results-view'),
-        };
-        const genderCategoryTitle = document.getElementById('gender-category-title');
-        const genderButtonsContainer = document.getElementById('gender-buttons');
-        const candidateCategoryTitle = document.getElementById('candidate-category-title');
-        const candidatesListEl = document.getElementById('candidates-list');
-        const infoMessageEl = document.getElementById('info-message-candidate');
-        const resultsListEl = document.getElementById('results-list');
-        const passwordModal = document.getElementById('password-modal');
-        const passwordInput = document.getElementById('password-input');
-        const cancelPasswordBtn = document.getElementById('cancel-password');
-        const submitPasswordBtn = document.getElementById('submit-password');
-        const modalTitle = document.getElementById('modal-title');
+  // DOM refs
+  const views = {
+    home: document.getElementById('home-view'),
+    gender: document.getElementById('gender-selection-view'),
+    candidate: document.getElementById('candidate-view'),
+    results: document.getElementById('results-view'),
+  };
+  const genderButtonsContainer = document.getElementById('gender-buttons');
+  const candidateCategoryTitle = document.getElementById('candidate-category-title');
+  const candidatesListEl = document.getElementById('candidates-list');
+  const infoMessageEl = document.getElementById('info-message-candidate');
+  const resultsListEl = document.getElementById('results-list');
+  const winnerDisplayEl = document.getElementById('winner-display');
+  const passwordModal = document.getElementById('password-modal');
+  const passwordInput = document.getElementById('password-input');
+  const cancelPasswordBtn = document.getElementById('cancel-password');
+  const submitPasswordBtn = document.getElementById('submit-password');
+  const modalTitle = document.getElementById('modal-title');
+  const toastEl = document.getElementById('toast-message');
 
-        // --- VIEW MANAGEMENT ---
-        const switchView = (viewToShow) => {
-            Object.values(views).forEach(view => view.style.display = 'none');
-            views[viewToShow].style.display = 'flex';
-        };
+  // ---------- helpers ----------
+  function showView(viewKey) {
+    Object.values(views).forEach(v => v.classList.remove('active'));
+    views[viewKey].classList.add('active');
+  }
 
-        const showHome = () => {
-            currentCategory = null;
-            categorySessionProgress = {};
-            switchView('home');
-        };
+  function showHome() {
+    currentCategory = null;
+    categorySessionProgress = {};
+    showView('home');
+  }
+
+  function showGenderSelection() {
+    showView('gender');
+    const maleBtn = genderButtonsContainer.querySelector('[data-gender="male"]');
+    const femaleBtn = genderButtonsContainer.querySelector('[data-gender="female"]');
+    maleBtn.className = 'btn gender-male';
+    femaleBtn.className = 'btn gender-female';
+    maleBtn.disabled = !!categorySessionProgress.male;
+    femaleBtn.disabled = !!categorySessionProgress.female;
+  }
+
+  function showCandidates(gender) {
+    showView('candidate');
+    infoMessageEl.classList.remove('visible');
+    infoMessageEl.textContent = '';
+    const genderLabel = gender.charAt(0).toUpperCase() + gender.slice(1);
+    candidateCategoryTitle.textContent = `👤 Candidates · ${genderLabel}`;
+    candidateCategoryTitle.style.cssText = 'font-size:1.8rem; font-weight:700; color:#1e3a8a; margin-bottom:32px;';
+    candidatesListEl.innerHTML = '';
+    const candidateObjects = candidates[currentCategory]?.[gender] || [];
+    if (!candidateObjects.length) {
+      infoMessageEl.textContent = '⚠️ No candidates available.';
+      infoMessageEl.classList.add('visible');
+      return;
+    }
+    const icons = gender === 'male' ? maleVotingIcons : femaleVotingIcons;
+    const genderClass = gender === 'male' ? 'gender-male' : 'gender-female';
+    const placeholderBg = gender === 'male' ? '#051b63' : '#9d174d';
+    
+    candidateObjects.forEach((cand, idx) => {
+      const card = document.createElement('div');
+      card.className = `candidate-card ${genderClass}`;
+      const iconSrc = icons[idx % icons.length] || '';
+      const placeholder = getPlaceholderSVG(cand.name, placeholderBg);
+      
+      card.innerHTML = `
+        <img src="${cand.logoUrl}" alt="${cand.name}" class="candidate-logo" loading="lazy" 
+             onerror="this.onerror=null;this.src='${placeholder}';" />
+        <img src="${iconSrc}" alt="voting icon" class="voting-icon" loading="lazy"
+             onerror="this.onerror=null;this.src='data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 width=%2260%22 height=%2260%22 viewBox=%220 0 60 60%22%3E%3Ccircle cx=%2230%22 cy=%2230%22 r=%2228%22 fill=%22%232563eb%22/%3E%3Ctext x=%2230%22 y=%2240%22 font-family=%22Inter, sans-serif%22 font-size=%2230%22 font-weight=%22700%22 text-anchor=%22middle%22 fill=%22white%22%3E✓%3C/text%3E%3C/svg%3E';" />
+        <div class="candidate-name">${cand.name}</div>
+        <button class="btn ${genderClass}">Vote</button>
+      `;
+      card.querySelector('.btn').onclick = () => castVote(gender, cand.name);
+      candidatesListEl.appendChild(card);
+    });
+  }
+
+  function castVote(gender, name) {
+    let votes = JSON.parse(localStorage.getItem('schoolVotes')) || {};
+    if (!votes[currentCategory]) votes[currentCategory] = {};
+    if (!votes[currentCategory][gender]) votes[currentCategory][gender] = {};
+    votes[currentCategory][gender][name] = (votes[currentCategory][gender][name] || 0) + 1;
+    localStorage.setItem('schoolVotes', JSON.stringify(votes));
+
+    categorySessionProgress[gender] = true;
+    candidatesListEl.innerHTML = '';
+    infoMessageEl.classList.add('visible');
+
+    if (categorySessionProgress.male && categorySessionProgress.female) {
+      infoMessageEl.textContent = '✅ Thank you! Both votes recorded.';
+      setTimeout(showHome, 2000);
+    } else {
+      infoMessageEl.textContent = '✔️ Vote cast! Please vote for the other gender.';
+      setTimeout(showGenderSelection, 1800);
+    }
+  }
+
+  function getWinners(votes) {
+    const winners = {};
+    const categories = ['head-class'];
+    
+    categories.forEach(cat => {
+      const catVotes = votes[cat];
+      if (!catVotes) return;
+      
+      ['male', 'female'].forEach(gender => {
+        const gVotes = catVotes[gender];
+        if (!gVotes || Object.keys(gVotes).length === 0) return;
         
-        const showGenderSelection = () => {
-            switchView('gender');
-            const displayName = "Head Boy/Head Girl";
-            genderCategoryTitle.textContent = `Vote for ${displayName}`;
-            
-            const maleBtn = genderButtonsContainer.querySelector('[data-gender="male"]');
-            const femaleBtn = genderButtonsContainer.querySelector('[data-gender="female"]');
-            
-            // Re-assign class based on category for color consistency
-            maleBtn.className = `btn ${currentCategory}`;
-            femaleBtn.className = `btn ${currentCategory}`;
-
-            maleBtn.disabled = categorySessionProgress.male || false;
-            femaleBtn.disabled = categorySessionProgress.female || false;
-        };
+        const candList = candidates[cat]?.[gender] || [];
+        let maxVotes = 0;
+        const tiedWinners = [];
         
-        const showCandidates = (gender) => {
-            switchView('candidate');
-            infoMessageEl.classList.remove('visible');
-            infoMessageEl.textContent = '';
-            const displayName = "Head Boy/Head Girl";
-            candidateCategoryTitle.textContent = `Candidates for ${displayName} (${gender})`;
-            candidatesListEl.innerHTML = '';
-            const candidateObjects = candidates[currentCategory]?.[gender] || [];
-            
-            if (candidateObjects.length === 0) {
-                infoMessageEl.textContent = "No candidates available for this category.";
-                infoMessageEl.classList.add('visible');
-            }
-
-            const currentVotingIcons = (gender === 'male') ? maleVotingIcons : femaleVotingIcons;
-            candidateObjects.forEach((candidate, index) => {
-                const card = document.createElement('div');
-                card.className = `candidate-card ${currentCategory}`;
-                
-                card.innerHTML = `
-                    <img src="${candidate.logoUrl}" alt="Logo for ${candidate.name}" class="candidate-logo" onerror="this.onerror=null;this.src='https://placehold.co/180x180/CCCCCC/FFFFFF?text=X';">
-                    <img src="${currentVotingIcons[index % currentVotingIcons.length]}" alt="Voting Icon" class="voting-icon" onerror="this.onerror=null;this.src='https://placehold.co/70x70/CCCCCC/FFFFFF?text=X';">
-                    <div class="candidate-name">${candidate.name}</div>
-                    <button class="btn ${currentCategory}">Vote</button>
-                `;
-                
-                card.querySelector('.btn').onclick = () => castVote(gender, candidate.name);
-                candidatesListEl.appendChild(card);
-            });
-        };
-        
-        const showResults = () => {
-            switchView('results');
-            renderResults();
-        };
-        
-        // --- DATA & LOGIC ---
-        const renderResults = () => {
-            const votes = JSON.parse(localStorage.getItem('schoolVotes')) || {};
-            resultsListEl.innerHTML = '';
-            const categoriesToRender = ['head-class']; 
-
-            let hasResults = false;
-            categoriesToRender.forEach(category => {
-                const categoryVotes = votes[category];
-                if (!categoryVotes || Object.keys(categoryVotes).length === 0) return;
-                
-                hasResults = true;
-                const categoryWrapper = document.createElement('div');
-                categoryWrapper.className = `result-category ${category}`;
-                const categoryTitle = document.createElement('h3');
-                categoryTitle.textContent = "Head Boy/Head Girl";
-                categoryWrapper.appendChild(categoryTitle);
-
-                ['male', 'female'].forEach(gender => {
-                    const genderVotes = categoryVotes[gender];
-                    if (!genderVotes || Object.keys(genderVotes).length === 0) return;
-
-                    const genderGroup = document.createElement('div');
-                    genderGroup.className = 'result-gender-group';
-
-                    const genderTitle = document.createElement('h4');
-                    genderTitle.textContent = gender.charAt(0).toUpperCase() + gender.slice(1);
-                    genderGroup.appendChild(genderTitle);
-                    
-                    const candidatesContainer = document.createElement('div');
-                    candidatesContainer.className = 'result-candidates';
-                    
-                    const currentCandidates = candidates[category]?.[gender] || [];
-                    const sorted = [...currentCandidates].sort((a, b) => (genderVotes[b.name] || 0) - (genderVotes[a.name] || 0));
-
-                    sorted.forEach(candidate => {
-                        const count = genderVotes[candidate.name] || 0;
-                        const el = document.createElement('div');
-                        el.className = 'result-candidate';
-                        el.innerHTML = `
-                            <span>${candidate.name}</span>
-                            <span class="vote-count">${count}</span>
-                        `;
-                        candidatesContainer.appendChild(el);
-                    });
-                    
-                    genderGroup.appendChild(candidatesContainer);
-                    categoryWrapper.appendChild(genderGroup);
-                });
-                if (categoryWrapper.children.length > 1) {
-                    resultsListEl.appendChild(categoryWrapper);
-                }
-            });
-
-            if (!hasResults) {
-                resultsListEl.innerHTML = '<p style="text-align: center; font-size: 1.2rem;">No voting results available yet.</p>';
-            }
-        };
-
-        const castVote = (gender, name) => {
-            let votes = JSON.parse(localStorage.getItem('schoolVotes')) || {};
-            if (!votes[currentCategory]) votes[currentCategory] = {};
-            if (!votes[currentCategory][gender]) votes[currentCategory][gender] = {};
-            votes[currentCategory][gender][name] = (votes[currentCategory][gender][name] || 0) + 1;
-            localStorage.setItem('schoolVotes', JSON.stringify(votes));
-            
-            categorySessionProgress[gender] = true;
-            candidatesListEl.innerHTML = ''; // Clear candidates to prevent double voting
-            infoMessageEl.classList.add('visible');
-
-            if (categorySessionProgress.male && categorySessionProgress.female) {
-                infoMessageEl.textContent = "Thank you! Your votes have been cast.";
-                setTimeout(showHome, 2500);
-            } else {
-                infoMessageEl.textContent = "Vote successful! Please vote for the other gender.";
-                setTimeout(showGenderSelection, 2500);
-            }
-        };
-
-        const resetVotes = () => {
-            // A confirmation could be added here if desired
-            localStorage.removeItem('schoolVotes');
-            showCustomMessage("All votes have been successfully reset.");
-            if (views.results.style.display === 'flex') {
-                renderResults();
-            }
-        };
-        
-        const showCustomMessage = (message) => {
-            const existingBox = document.querySelector('.custom-message-box');
-            if (existingBox) existingBox.remove();
-
-            const messageBox = document.createElement('div');
-            messageBox.className = 'custom-message-box';
-            messageBox.style.cssText = `
-                position: fixed; top: 20px; left: 50%; transform: translateX(-50%);
-                background: rgba(0, 0, 0, 0.85); color: white; padding: 15px 25px;
-                border-radius: 10px; z-index: 2000; font-size: 1rem; text-align: center;
-                box-shadow: 0 5px 15px rgba(0,0,0,0.3); opacity: 0;
-                transition: all 0.4s ease;
-            `;
-            messageBox.textContent = message;
-            document.body.appendChild(messageBox);
-
-            setTimeout(() => { messageBox.style.opacity = '1'; messageBox.style.top = '30px'; }, 10);
-            setTimeout(() => {
-                messageBox.style.opacity = '0';
-                messageBox.style.top = '20px';
-                messageBox.addEventListener('transitionend', () => messageBox.remove(), { once: true });
-            }, 2200);
-        };
-
-        const showPasswordModal = (action) => {
-            currentAction = action;
-            modalTitle.textContent = action === 'view-results' 
-                ? "Enter Password to View Results"
-                : "Enter Admin Password to Reset Votes";
-            passwordInput.value = '';
-            passwordModal.classList.add('active');
-            passwordInput.focus();
-        };
-
-        const hidePasswordModal = () => passwordModal.classList.remove('active');
-
-        const checkPassword = () => {
-            if (passwordInput.value.trim() === ADMIN_PASSWORD) {
-                hidePasswordModal();
-                if (currentAction === 'view-results') showResults();
-                else if (currentAction === 'reset-votes') resetVotes();
-            } else {
-                showCustomMessage("Incorrect password.");
-                passwordInput.value = '';
-                passwordInput.focus();
-            }
-        };
-
-        // --- EVENT LISTENERS ---
-        document.querySelector('#home-view .button-grid').addEventListener('click', (e) => {
-            const categoryButton = e.target.closest('[data-category]');
-            if (categoryButton) {
-                currentCategory = categoryButton.dataset.category;
-                categorySessionProgress = {};
-                showGenderSelection();
-            }
+        // Find max votes
+        candList.forEach(c => {
+          const count = gVotes[c.name] || 0;
+          if (count > maxVotes) {
+            maxVotes = count;
+          }
         });
         
-        genderButtonsContainer.addEventListener('click', (e) => {
-            const genderButton = e.target.closest('[data-gender]');
-            if (genderButton && !genderButton.disabled) {
-                showCandidates(genderButton.dataset.gender);
-            }
+        // Find all candidates with max votes
+        candList.forEach(c => {
+          const count = gVotes[c.name] || 0;
+          if (count === maxVotes && maxVotes > 0) {
+            tiedWinners.push({ ...c, votes: count, gender, category: cat });
+          }
         });
         
-        document.querySelector('[data-action="go-home"]').addEventListener('click', showHome);
-        document.querySelector('[data-action="go-to-gender-select"]').addEventListener('click', showGenderSelection);
-        
-        document.getElementById('show-results-btn').addEventListener('click', () => showPasswordModal('view-results'));
-        document.getElementById('reset-btn').addEventListener('click', () => showPasswordModal('reset-votes'));
-        document.getElementById('results-back-btn').addEventListener('click', showHome);
-        
-        cancelPasswordBtn.addEventListener('click', hidePasswordModal);
-        submitPasswordBtn.addEventListener('click', checkPassword);
-        passwordInput.addEventListener('keypress', (e) => {
-            if (e.key === 'Enter') checkPassword();
-        });
+        if (tiedWinners.length > 0) {
+          const key = `${cat}-${gender}`;
+          winners[key] = tiedWinners;
+        }
+      });
+    });
+    
+    return winners;
+  }
 
-        // --- INITIALIZATION ---
-        showHome();
-    })();
+  function renderResults() {
+    const votes = JSON.parse(localStorage.getItem('schoolVotes')) || {};
+    resultsListEl.innerHTML = '';
+    winnerDisplayEl.innerHTML = '';
+    
+    // Display winners
+    const winners = getWinners(votes);
+    const winnerKeys = Object.keys(winners);
+    
+    if (winnerKeys.length > 0) {
+      winnerKeys.forEach(key => {
+        const winnerList = winners[key];
+        const isTie = winnerList.length > 1;
+        const genderLabel = winnerList[0].gender === 'male' ? 'Head Boy' : 'Head Girl';
+        
+        winnerList.forEach((winner, index) => {
+          const placeholder = getPlaceholderSVG(winner.name, winner.gender === 'male' ? '#1e40af' : '#9d174d');
+          
+          const card = document.createElement('div');
+          card.className = `winner-card${isTie ? ' tie-badge' : ''}`;
+          
+          let trophyIcon = '🏆';
+          if (isTie) {
+            trophyIcon = index === 0 ? '🏆' : '🥇';
+          }
+          
+          card.innerHTML = `
+            <span class="trophy">${trophyIcon}</span>
+            <img src="${winner.logoUrl}" alt="${winner.name}" class="winner-avatar" 
+                 onerror="this.onerror=null;this.src='${placeholder}';" />
+            <div class="winner-info">
+              <div class="winner-name">
+                ${winner.name}
+                ${isTie ? `<span class="tie-label">TIE</span>` : ''}
+              </div>
+              <div class="winner-role">${genderLabel}</div>
+            </div>
+            <div class="winner-votes">🎯 ${winner.votes} votes</div>
+          `;
+          winnerDisplayEl.appendChild(card);
+        });
+      });
+    } else {
+      winnerDisplayEl.innerHTML = '<div class="no-winner">🏳️ No votes have been cast yet.</div>';
+    }
+    
+    // Display all results
+    const categories = ['head-class'];
+    let hasData = false;
+    
+    categories.forEach(cat => {
+      const catVotes = votes[cat];
+      if (!catVotes || Object.keys(catVotes).length === 0) return;
+      hasData = true;
+      
+      const wrapper = document.createElement('div');
+      wrapper.className = `result-category ${cat}`;
+      const title = document.createElement('h3');
+      title.innerHTML = '🏅 Head Boy / Head Girl';
+      wrapper.appendChild(title);
+      
+      ['male', 'female'].forEach(gender => {
+        const gVotes = catVotes[gender];
+        if (!gVotes || Object.keys(gVotes).length === 0) return;
+        
+        const group = document.createElement('div');
+        group.className = 'result-gender-group';
+        const h4 = document.createElement('h4');
+        h4.innerHTML = gender === 'male' ? '♂ Male' : '♀ Female';
+        group.appendChild(h4);
+        
+        const container = document.createElement('div');
+        container.className = 'result-candidates';
+        const candList = candidates[cat]?.[gender] || [];
+        const sorted = [...candList].sort((a,b) => (gVotes[b.name]||0) - (gVotes[a.name]||0));
+        const maxVotes = sorted.length > 0 ? (gVotes[sorted[0]?.name] || 0) : 0;
+        
+        sorted.forEach(c => {
+          const count = gVotes[c.name] || 0;
+          const isWinner = count > 0 && count === maxVotes && maxVotes > 0;
+          const el = document.createElement('div');
+          el.className = `result-candidate${isWinner ? ' winner-highlight' : ''}`;
+          el.innerHTML = `
+            <span>${isWinner ? '👑 ' : ''}${c.name}</span>
+            <span class="vote-count">${count}</span>
+          `;
+          container.appendChild(el);
+        });
+        group.appendChild(container);
+        wrapper.appendChild(group);
+      });
+      
+      if (wrapper.children.length > 1) resultsListEl.appendChild(wrapper);
+    });
+    
+    if (!hasData) {
+      resultsListEl.innerHTML = '<div class="no-results">📭 No votes have been cast yet.</div>';
+    }
+  }
+
+  function resetVotes() {
+    localStorage.removeItem('schoolVotes');
+    showToast('🔄 All votes have been reset.');
+    if (views.results.classList.contains('active')) renderResults();
+  }
+
+  function showToast(msg) {
+    toastEl.textContent = msg;
+    toastEl.classList.add('show');
+    clearTimeout(toastEl._hideTimer);
+    toastEl._hideTimer = setTimeout(() => toastEl.classList.remove('show'), 2400);
+  }
+
+  // password modal
+  function showPasswordModal(action) {
+    currentAction = action;
+    modalTitle.textContent = action === 'view-results' ? '🔑 View Results' : '🛡️ Reset Votes';
+    passwordInput.value = '';
+    passwordModal.classList.add('active');
+    passwordInput.focus();
+  }
+  function hidePasswordModal() { passwordModal.classList.remove('active'); }
+  function checkPassword() {
+    if (passwordInput.value.trim() === ADMIN_PASSWORD) {
+      hidePasswordModal();
+      if (currentAction === 'view-results') { showView('results'); renderResults(); }
+      else if (currentAction === 'reset-votes') resetVotes();
+    } else {
+      showToast('❌ Incorrect password.');
+      passwordInput.value = '';
+      passwordInput.focus();
+    }
+  }
+
+  // ---------- event binding ----------
+  document.querySelector('#home-view .button-grid').addEventListener('click', (e) => {
+    const catBtn = e.target.closest('[data-category]');
+    if (catBtn) {
+      currentCategory = catBtn.dataset.category;
+      categorySessionProgress = {};
+      showGenderSelection();
+    }
+  });
+
+  genderButtonsContainer.addEventListener('click', (e) => {
+    const btn = e.target.closest('[data-gender]');
+    if (btn && !btn.disabled) showCandidates(btn.dataset.gender);
+  });
+
+  document.querySelector('[data-action="go-home"]')?.addEventListener('click', showHome);
+  document.querySelector('[data-action="go-to-gender-select"]')?.addEventListener('click', showGenderSelection);
+
+  document.getElementById('show-results-btn').addEventListener('click', () => showPasswordModal('view-results'));
+  document.getElementById('reset-btn').addEventListener('click', () => showPasswordModal('reset-votes'));
+  document.getElementById('results-back-btn').addEventListener('click', showHome);
+
+  cancelPasswordBtn.addEventListener('click', hidePasswordModal);
+  submitPasswordBtn.addEventListener('click', checkPassword);
+  passwordInput.addEventListener('keydown', (e) => { if (e.key === 'Enter') checkPassword(); });
+
+  passwordModal.addEventListener('click', (e) => { if (e.target === passwordModal) hidePasswordModal(); });
+
+  // start
+  showHome();
+})();
